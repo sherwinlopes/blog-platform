@@ -5,7 +5,7 @@ const User = require('../models/User');
 
 const router = express.Router();
 
-router.post('./register', async (req, res) => {
+router.post('/register', async (req, res) => {
     try{
         const user = new User(req.body);
         await user.save();
@@ -31,5 +31,17 @@ router.post('/login', async (req, res) => {
     res.json({ token, user: { username: user.username, email: user.email}});
 }
 );  
+
+const auth = require('../middleware/authMiddleware');
+
+router.get('/', auth, async (req, res) => {
+  try {
+    const posts = await Post.find({ author: req.user.id }).sort({ created: -1 });
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch posts' });
+  }
+});
+
 
 module.exports =router;
